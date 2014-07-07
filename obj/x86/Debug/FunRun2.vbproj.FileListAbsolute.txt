@@ -1,0 +1,15 @@
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\FunRun2.exe
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\FunRun2.pdb
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\FunRun2.xml
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\AlienRFID2.dll
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\AlienRFID2.xml
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.vbprojResolveAssemblyReference.cache
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.frmSetupReader.resources
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.Resources.resources
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.vbproj.GenerateResource.Cache
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.exe
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.xml
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.pdb
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.frmMain.resources
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\FunRun2.exe.config
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.frmConnectSettings.resources
