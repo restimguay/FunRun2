@@ -13,3 +13,7 @@ C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.pdb
 C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.frmMain.resources
 C:\5_CODES\FunRun2\FunRun2\bin\Debug\FunRun2.exe.config
 C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.frmConnectSettings.resources
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\FunRun2.exe.manifest
+C:\5_CODES\FunRun2\FunRun2\bin\Debug\FunRun2.application
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.exe.manifest
+C:\5_CODES\FunRun2\FunRun2\obj\x86\Debug\FunRun2.application

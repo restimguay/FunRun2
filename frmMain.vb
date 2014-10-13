@@ -1,6 +1,7 @@
 ﻿Imports nsAlienRFID2
 Imports System.ComponentModel
 Public Class frmMain
+
     Private runnersDao As New RunnerDAO
     Private categoryDao As New CategoryDAO
     Private WithEvents reader As New clsReader
@@ -9,19 +10,25 @@ Public Class frmMain
     Private categories As New Dictionary(Of String, Category)
     Private monitor As New clsReaderMonitor
     Private CUSTOM_FORMAT As String = "${TAGIDB}, ${TX}, ${DATE2} ${TIME2}, ${PCWORD}, ${SPEED}, ${RSSI}, ${G2DATA1}, ${FREQ}"
-
+    Private unEnrolledCounter As Integer = 0
     Private Sub Form1_FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
         If MsgBox("Are you sure you want to close this window and stop the race?", MsgBoxStyle.YesNo, "Confirm") = MsgBoxResult.Yes Then
             If reader.IsConnected Then
                 reader.AutoMode = "OFF"
                 reader.Disconnect()
             End If
+
+            e.Cancel = False
+            Exit Sub
         End If
+        e.Cancel = True
     End Sub
+
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
         runners = runnersDao.getRunnersList()
         categories = categoryDao.getCategoryList()
         refreshCategoryList()
+        Me.lblRunnersCount.Text = "Total Runners:   " & runners.Count
     End Sub
 
     Private Sub Timer1_Tick(sender As System.Object, e As System.EventArgs) Handles Timer1.Tick
@@ -30,6 +37,7 @@ Public Class frmMain
                 Dim tagList As String = reader.TagList
                 Dim tagInfos(20000) As TagInfo
                 Me.lblTagDetected.Text = ""
+                Me.rtbDetected.Clear()
 
                 If tagList <> "Tag List has been cleared!" And tagList <> "(No Tags)" Then
 
@@ -40,6 +48,12 @@ Public Class frmMain
                     End If
                     If count > 0 Then
                         For i As Integer = 0 To count - 1
+
+                            Dim tagDisplay As String = tagInfos(i).TagID
+                            If tagInfos(i).TagID.Length > 5 Then
+                                tagDisplay = "..." & tagInfos(i).TagID.Substring(tagInfos(i).TagID.Length - 5)
+                            End If
+                            Me.rtbDetected.AppendText("Antenna_" & tagInfos(i).Antenna & ":" & tagDisplay & vbNewLine)
                             'check if the tagID is loaded from the RUNNERS table
                             'reject if not found
                             If runners.ContainsKey(tagInfos(i).TagID) Then
@@ -48,12 +62,21 @@ Public Class frmMain
                                 If categories.ContainsKey(runners.Item(tagInfos(i).TagID).RUNNER_CATEGORY) Then
                                     'check if the category has ben started
                                     If categories.Item(runners.Item(tagInfos(i).TagID).RUNNER_CATEGORY).CATEGORY_START_TIME <> "" Then
-                                        'if all passed update the runner, further validation in on the way
+                                        'if all passed, update the runner, further validation is on the way
                                         updateRunner(tagInfos(i).TagID, CDate(tagInfos(i).DiscoveryTime))
                                     End If
                                 End If
                             Else
-                                Me.rtbxLogs.AppendText(tagInfos(i).TagID & " - DOES NOT EXISTS - " & tagInfos(i).DiscoveryTime & vbNewLine)
+                                unEnrolledCounter += 1
+                                Dim rnr As New Runner
+                                rnr.RUNNER_NAME = "RUNNER_" & unEnrolledCounter
+                                rnr.RUNNER_BIB_NUMBER = 10000 + unEnrolledCounter
+                                rnr.RUNNER_RFID_NUMBER = tagInfos(i).TagID
+                                rnr.RUNNER_CATEGORY = "DEFAULT"
+                                runners.Add(tagInfos(i).TagID, rnr)
+                                runnersDao.insert(rnr)
+                                updateRunner(tagInfos(i).TagID, CDate(tagInfos(i).DiscoveryTime))
+                                'Me.rtbxLogs.AppendText("DOES NOT EXISTS :" & stingTolen(tagInfos(i).TagID, 30) & tagInfos(i).DiscoveryTime & vbNewLine)
                             End If
                         Next
                     End If
@@ -63,24 +86,46 @@ Public Class frmMain
 
             End Try
         End If
+        Dim started As Integer = countStartedRunners()
+        lblStartedRunners.Text = "Detected:        " & started
+        Dim running As Integer = countRunningRunners()
+        lblRemainingRunners.Text = "Running Runners: " & running
+        Dim finised As Integer = countFinishedRunners()
+        lblFinishedRunners.Text = "Finised Runners: " & finised
 
     End Sub
+    Private Function formatFinisher(ByVal tagID As String)
+        Return runners.Item(tagID).RUNNER_NAME
+    End Function
+    Private Function stingTolen(ByVal str As String, ByVal len As Integer)
+        If str.Length < len Then
+            While str.Length < len
+                str &= " "
+            End While
+        End If
+        Return str
+    End Function
     Private Sub updateRunner(tagID As String, dateTime As DateTime)
 
         Dim runner As Runner = runners.Item(tagID)
         'reject if the runner stays at the finish line
-        If runner.RUNNER_START_TIME <> "" Then
+        If runner.RUNNER_FINISH_TIME = "" And runner.RUNNER_START_TIME <> "" Then
             If dateTime.Subtract(CDate(runner.RUNNER_BIB_LAST_DETECTED)).TotalMinutes < categories.Item(runners.Item(tagID).RUNNER_CATEGORY).CATEGORY_MIN_MINUTES Then
                 runners.Item(tagID).RUNNER_BIB_LAST_DETECTED = Now
                 Exit Sub
             End If
+        ElseIf runner.RUNNER_FINISH_TIME <> "" And runner.RUNNER_START_TIME <> "" Then
+            Return
         End If
-
+        Dim tagDisplay As String = tagID
+        If tagID.Length > 5 Then
+            tagDisplay = "..." & tagID.Substring(tagID.Length - 5)
+        End If
         'check if the runner was not detected from starting line
         'set the start time to category start time
         'set the finish time to current time
         If runner.RUNNER_START_TIME = "" And dateTime.Subtract(CDate(categories.Item(runners.Item(tagID).RUNNER_CATEGORY).CATEGORY_START_TIME)).TotalMinutes > categories.Item(runners.Item(tagID).RUNNER_CATEGORY).CATEGORY_MIN_MINUTES Then
-
+            runner.RUNNER_START_TIME = categories.Item(runners.Item(tagID).RUNNER_CATEGORY).CATEGORY_START_TIME
             Dim endTime As DateTime = dateTime
             Dim chipSpan As TimeSpan = endTime.Subtract(CDate(runner.RUNNER_START_TIME))
             Dim gunSpan As TimeSpan = endTime.Subtract(CDate(categories.Item(runners.Item(tagID).RUNNER_CATEGORY).CATEGORY_START_TIME))
@@ -92,7 +137,7 @@ Public Class frmMain
                 .RUNNER_GUN_TIME = gunSpan.Hours & ":" & gunSpan.Minutes & ":" & gunSpan.Seconds & ":" & gunSpan.Milliseconds
             End With
             runners.Item(tagID) = runner
-            Me.rtbxLogs.AppendText("START/FINISH- " & tagID & vbNewLine)
+            Me.rtbxLogs.AppendText("FINISHED_1 " & stingTolen(runners.Item(tagID).RUNNER_NAME, 30) & " : " & runners.Item(tagID).RUNNER_GUN_TIME & " : " & stingTolen(tagDisplay, 6) & vbNewLine)
             runnersDao.update(runner)
         ElseIf runner.RUNNER_START_TIME = "" Then
             'check if the runner was detected at starting line
@@ -101,7 +146,7 @@ Public Class frmMain
                 .RUNNER_BIB_LAST_DETECTED = dateTime
             End With
             runners.Item(tagID) = runner
-            Me.rtbxLogs.AppendText("START - " & tagID & vbNewLine)
+            Me.rtbxLogs.AppendText("STARTED    " & stingTolen(runners.Item(tagID).RUNNER_NAME, 30) & " : " & runners.Item(tagID).RUNNER_START_TIME & " : " & stingTolen(tagDisplay, 6) & vbNewLine)
             runnersDao.update(runner)
         ElseIf runner.RUNNER_FINISH_TIME = "" Then
             'check if the runner was detected at finishing line
@@ -115,8 +160,7 @@ Public Class frmMain
                 .RUNNER_GUN_TIME = gunSpan.Hours & ":" & gunSpan.Minutes & ":" & gunSpan.Seconds & ":" & gunSpan.Milliseconds
             End With
             runners.Item(tagID) = runner
-            Me.rtbxLogs.AppendText("FINISH - " & tagID & vbNewLine)
-
+            Me.rtbxLogs.AppendText("FINISHED_2 " & stingTolen(runners.Item(tagID).RUNNER_NAME, 30) & " : " & runners.Item(tagID).RUNNER_GUN_TIME & " : " & stingTolen(tagDisplay, 6) & vbNewLine)
             runnersDao.update(runner)
         End If
     End Sub
@@ -165,7 +209,9 @@ Public Class frmMain
                 reader.TagStreamAddress = server.NotificationHost
                 server.MaxNotifications = 10000
                 server.MaxQueuedMessages = 10000
+                reader.AutoMode = "ON"
                 server.StartListening()
+                Timer1.Interval = My.Settings.scanInterval
                 Timer1.Enabled = True
                 Timer1.Start()
             Catch ex As Exception
@@ -208,6 +254,37 @@ Public Class frmMain
         refreshCategoryList()
     End Sub
 
+    Private Function countStartedRunners()
+        Dim count As Integer = 0
+        For Each runner As KeyValuePair(Of String, Runner) In runners
+            If Not runners.Item(runner.Key).RUNNER_START_TIME = "" Then
+                count += 1
+            End If
+        Next
+        Return count
+    End Function
+
+
+    Private Function countRunningRunners()
+        Dim count As Integer = 0
+        For Each runner As KeyValuePair(Of String, Runner) In runners
+            If Not runners.Item(runner.Key).RUNNER_START_TIME = "" And runners.Item(runner.Key).RUNNER_FINISH_TIME = "" Then
+                count += 1
+            End If
+        Next
+        Return count
+    End Function
+
+
+    Private Function countFinishedRunners()
+        Dim count As Integer = 0
+        For Each runner As KeyValuePair(Of String, Runner) In runners
+            If Not runners.Item(runner.Key).RUNNER_START_TIME = "" And Not runners.Item(runner.Key).RUNNER_FINISH_TIME = "" Then
+                count += 1
+            End If
+        Next
+        Return count
+    End Function
     Private Sub cmdClearResults_Click(sender As System.Object, e As System.EventArgs) Handles cmdClearResults.Click
         If Not MsgBox("Are you sure you want to clear Results?", MsgBoxStyle.OkCancel, "Confirm") = MsgBoxResult.Ok Then
 
@@ -239,6 +316,10 @@ Public Class frmMain
 
 
     Private Sub cmdStop_Click(sender As System.Object, e As System.EventArgs) Handles cmdStop.Click
+        If (MsgBox("Are you sure you want to stop the selected category?", MsgBoxStyle.YesNo, "Confirm") = MsgBoxResult.No) Then
+            Return
+        End If
+
         For Each item As String In Me.lbxCategories.SelectedItems
             Dim key As String = item.Split(":")(0)
             categories.Item(key).CATEGORY_START_TIME = ""
@@ -264,6 +345,7 @@ Public Class frmMain
         runners = runnersDao.getRunnersList()
         categories = categoryDao.getCategoryList()
         refreshCategoryList()
+        Me.lblRunnersCount.Text = "Total Runners:   " & runners.Count
     End Sub
 
     Private Sub doBeep()
@@ -272,6 +354,5 @@ Public Class frmMain
             Beep()   ' Sound a tone.
             I += 1
         Next I
-
     End Sub
 End Class

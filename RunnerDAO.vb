@@ -11,9 +11,10 @@ Public Class RunnerDAO
             Dim lastIndex As Integer = 0
             While reader.Read
                 Dim runner As New Runner
-                runner.RUNNER_RFID_NUMBER = reader("RUNNER_RFID_NUMBER")
-                runner.RUNNER_BIB_NUMBER = reader("RUNNER_BIB_NUMBER")
+                runner.RUNNER_RFID_NUMBER = reader("RUNNER_RFID_NUMBER").ToString
+                runner.RUNNER_BIB_NUMBER = reader("RUNNER_BIB_NUMBER").ToString
                 runner.RUNNER_NAME = reader("RUNNER_NAME").ToString
+                runner.RUNNER_FINISH_TIME = reader("RUNNER_FINISH_TIME").ToString
                 runner.RUNNER_GENDER = reader("RUNNER_GENDER").ToString
                 runner.RUNNER_RANK = reader("RUNNER_RANK").ToString
                 runner.RUNNER_START_TIME = reader("RUNNER_START_TIME").ToString
@@ -26,7 +27,12 @@ Public Class RunnerDAO
 
         Return runners
     End Function
-
+    Function insert(runner As Runner)
+        Dim sql As String = "INSERT INTO RUNNER "
+        Dim fields As String = "(RUNNER_RFID_NUMBER,RUNNER_NAME,RUNNER_GENDER,RUNNER_AGE,RUNNER_START_TIME,RUNNER_FINISH_TIME,RUNNER_GUN_TIME,RUNNER_CHIP_TIME,RUNNER_RANK,RUNNER_CATEGORY,RUNNER_BIB_NUMBER) "
+        Dim values As String = "VALUES('" & runner.RUNNER_RFID_NUMBER & "','" & runner.RUNNER_NAME & "','" & runner.RUNNER_GENDER & "','" & runner.RUNNER_AGE & "','" & runner.RUNNER_START_TIME & "','" & runner.RUNNER_FINISH_TIME & "','" & runner.RUNNER_GUN_TIME & "','" & runner.RUNNER_CHIP_TIME & "','" & runner.RUNNER_RANK & "','" & runner.RUNNER_CATEGORY & "','" & runner.RUNNER_BIB_NUMBER & "')"
+        Return model.update(sql & fields & values)
+    End Function
     Function update(runner As Runner) As Integer
         Dim sql As String = "UPDATE RUNNER SET"
 
@@ -40,7 +46,7 @@ Public Class RunnerDAO
         sql &= ", RUNNER_CHIP_TIME= '" & runner.RUNNER_CHIP_TIME & "'"
         sql &= ", RUNNER_RANK= '" & runner.RUNNER_RANK & "'"
         sql &= ", RUNNER_CATEGORY= '" & runner.RUNNER_CATEGORY & "'"
-        sql &= " WHERE RUNNER_BIB_NUMBER = " & runner.RUNNER_BIB_NUMBER
+        sql &= " WHERE RUNNER_BIB_NUMBER = '" & runner.RUNNER_BIB_NUMBER & "'"
         Return model.update(sql)
     End Function
     Function resetRunners()

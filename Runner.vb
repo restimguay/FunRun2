@@ -10,6 +10,6 @@
     Public RUNNER_RANK As String
     Public RUNNER_FINISH_TIME As String
     Public RUNNER_CATEGORY As String
-    Public RUNNER_BIB_NUMBER As Integer
+    Public RUNNER_BIB_NUMBER As String
     Public RUNNER_BIB_LAST_DETECTED As Date
 End Class

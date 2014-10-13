@@ -29,10 +29,12 @@ Partial Class frmConnectSettings
         Me.cmdSaveConnect = New System.Windows.Forms.Button()
         Me.cmdCancel = New System.Windows.Forms.Button()
         Me.Label5 = New System.Windows.Forms.Label()
+        Me.tbcPort = New System.Windows.Forms.TextBox()
+        Me.ComboBox1 = New System.Windows.Forms.ComboBox()
+        Me.Label6 = New System.Windows.Forms.Label()
         Me.tbxAntennaPower = New System.Windows.Forms.TextBox()
         Me.tbxPassword = New System.Windows.Forms.TextBox()
         Me.tbxUsername = New System.Windows.Forms.TextBox()
-        Me.tbcPort = New System.Windows.Forms.TextBox()
         Me.tbxIP = New System.Windows.Forms.TextBox()
         Me.SuspendLayout()
         '
@@ -99,6 +101,35 @@ Partial Class frmConnectSettings
         Me.Label5.TabIndex = 10
         Me.Label5.Text = "Antenna Power"
         '
+        'tbcPort
+        '
+        Me.tbcPort.DataBindings.Add(New System.Windows.Forms.Binding("Text", Global.FunRun2.My.MySettings.Default, "tcpport", True, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged))
+        Me.tbcPort.Location = New System.Drawing.Point(57, 48)
+        Me.tbcPort.Name = "tbcPort"
+        Me.tbcPort.Size = New System.Drawing.Size(100, 20)
+        Me.tbcPort.TabIndex = 3
+        Me.tbcPort.Text = "23"
+        '
+        'ComboBox1
+        '
+        Me.ComboBox1.DataBindings.Add(New System.Windows.Forms.Binding("Text", Global.FunRun2.My.MySettings.Default, "scanInterval", True, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged))
+        Me.ComboBox1.FormattingEnabled = True
+        Me.ComboBox1.Items.AddRange(New Object() {"10", "20", "30", "40", "50", "60", "70", "80", "90", "100", "120", "140", "160", "180", "200", "220", "240", "260", "280", "300", "320", "340", "360", "380", "400", "420", "440", "460", "480", "500", "520", "540", "560", "580", "600", "620", "640", "680", "700", "720", "740", "760", "780", "800", "820", "840", "860", "880", "900", "920", "940", "960", "980", "1000"})
+        Me.ComboBox1.Location = New System.Drawing.Point(228, 84)
+        Me.ComboBox1.Name = "ComboBox1"
+        Me.ComboBox1.Size = New System.Drawing.Size(100, 21)
+        Me.ComboBox1.TabIndex = 12
+        Me.ComboBox1.Text = Global.FunRun2.My.MySettings.Default.scanInterval
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Location = New System.Drawing.Point(155, 87)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(70, 13)
+        Me.Label6.TabIndex = 13
+        Me.Label6.Text = "Scan Interval"
+        '
         'tbxAntennaPower
         '
         Me.tbxAntennaPower.DataBindings.Add(New System.Windows.Forms.Binding("Text", Global.FunRun2.My.MySettings.Default, "antennaPower", True, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged))
@@ -127,15 +158,6 @@ Partial Class frmConnectSettings
         Me.tbxUsername.TabIndex = 5
         Me.tbxUsername.Text = Global.FunRun2.My.MySettings.Default.username
         '
-        'tbcPort
-        '
-        Me.tbcPort.DataBindings.Add(New System.Windows.Forms.Binding("Text", Global.FunRun2.My.MySettings.Default, "tcpport", True, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged))
-        Me.tbcPort.Location = New System.Drawing.Point(57, 48)
-        Me.tbcPort.Name = "tbcPort"
-        Me.tbcPort.Size = New System.Drawing.Size(100, 20)
-        Me.tbcPort.TabIndex = 3
-        Me.tbcPort.Text = Global.FunRun2.My.MySettings.Default.tcpport
-        '
         'tbxIP
         '
         Me.tbxIP.DataBindings.Add(New System.Windows.Forms.Binding("Text", Global.FunRun2.My.MySettings.Default, "ip", True, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged))
@@ -150,6 +172,8 @@ Partial Class frmConnectSettings
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(350, 159)
+        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.ComboBox1)
         Me.Controls.Add(Me.tbxAntennaPower)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.cmdCancel)
@@ -180,4 +204,6 @@ Partial Class frmConnectSettings
     Friend WithEvents cmdCancel As System.Windows.Forms.Button
     Friend WithEvents Label5 As System.Windows.Forms.Label
     Friend WithEvents tbxAntennaPower As System.Windows.Forms.TextBox
+    Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
+    Friend WithEvents Label6 As System.Windows.Forms.Label
 End Class

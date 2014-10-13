@@ -28,9 +28,9 @@ Public Class CategoryDAO
 
         sql &= " CATEGORY_DISTANCE='" & category.CATEGORY_DISTANCE & "'"
         sql &= ", CATEGORY_MIN_MINUTES='" & category.CATEGORY_MIN_MINUTES & "'"
-        sql &= ", CATEGORY_NAME='" & category.CATEGORY_NAME & "'"
         sql &= ", CATEGORY_START_TIME='" & category.CATEGORY_START_TIME & "'"
         sql &= " WHERE CATEGORY_DISTANCE = " & category.CATEGORY_DISTANCE
+        sql &= " AND CATEGORY_NAME='" & category.CATEGORY_NAME & "'"
         Return model.update(sql)
     End Function
 

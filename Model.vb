@@ -9,7 +9,7 @@ Public Class Model
     Private Shared dbCon As DbConnection
 
     Public Sub New()
-        Debug.Print("hello")
+
         dbCon = New OleDbConnection(dbConString)
         If dbCon.State = ConnectionState.Closed Then
             dbCon = New OleDbConnection(dbConString)
